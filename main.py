@@ -12,7 +12,7 @@ players = [ User('Вася', 'Пупкин', 0), User('Петя', 'Тряпки�
 def users():
     return {
         'count': len(players),
-        'users': players
+        'users': listToJSON(players)
     }
 
 @app.route('/user/<id>', methods = ['GET', 'PUT', 'DELETE'])
@@ -20,18 +20,20 @@ def user_id(id):
     id = int(id)
 
     if request.method == "GET":
-        return players[id]
+        return players[id].toJSON()
     
     elif request.method == "PUT":
         data = request.json
-        players[id] = data['name']
+        players[id].name = data['name']
+        players[id].secname = data["secname"]
+        players[id].online = data["online"]
         return {
             'id': id,
-            'name': players[id]
+            "user" : players[id].toJSON()
         }
     
     elif request.method == 'DELETE':
-        buffer_name = players[id]
+        buffer_name = players[id].name
         players.pop(id)
         return {
             'id': id,
@@ -42,7 +44,8 @@ def user_id(id):
 def user():
     if request.method == 'POST':
         data = request.json
-        players.append(data['name'])
+        buf_User = User(data["name"], data["secname"], len(players))
+        players.append(buf_User)
         return {
             'id': len(players) - 1,
             'name': data['name']
